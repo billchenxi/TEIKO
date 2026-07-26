@@ -56,26 +56,52 @@ def subjects_by_response():
 
 
 def subjects_by_sex():
-	return query(
+    return query(
 		BASELINE_SQL + "SELECT sex, COUNT(DISTINCT subject) AS n_subjects FROM baseline GROUP BY sex ORDER BY sex",
 		params=_PARAMS,
 	)
 
 
-def main():
-	cohort = baseline_cohort()
-	print(f"Baseline subset: {len(cohort)} samples\n")
+def avg_bcell_melanoma_male_baseline():
+    """
+    Mean B-cell count for melanoma MALE responders at baseline (time 0),
+    across ALL sample types and treatments.
+    """
+    sql = """
+        SELECT ROUND(AVG(cc.count), 2) AS avg_b_cells
+        FROM cell_counts cc
+        JOIN cell_populations p ON p.population_id   = cc.population_id
+        JOIN samples sm ON sm.sample_id = cc.sample_id
+        JOIN subjects su ON su.subject_id = sm.subject_id
+        JOIN conditions cond ON cond.condition_id = su.condition_id
+        WHERE p.population_name = 'b_cell'
+        	AND cond.condition_name = 'melanoma'
+        	AND su.sex = 'M'
+        	AND sm.response = 'yes'
+        	AND sm.time_from_treatment_start = 0
+    """
+    return query(sql)["avg_b_cells"].iloc[0]
 
-	for title, table in [
+
+def main():
+    cohort = baseline_cohort()
+    print(f"Baseline subset: {len(cohort)} samples\n")
+
+    for title, table in [
 		("Samples per project",  samples_per_project()),
 		("Subjects by response", subjects_by_response()),
 		("Subjects by sex",      subjects_by_sex()),
 	]:
-		print(title)
-		print(table.to_string(index=False))
-		print()
-	return 0
-	
+        print(title)
+        print(table.to_string(index=False))
+        print()
+
+    print(
+        f"Avg B cells (melanoma male responders, time 0): "
+        f"{avg_bcell_melanoma_male_baseline():.2f}"
+    )
+    return 0
+
 
 if __name__ == "__main__":
 	raise SystemExit(main())
