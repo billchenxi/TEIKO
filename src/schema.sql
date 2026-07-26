@@ -59,3 +59,4 @@ CREATE VIEW IF NOT EXISTS view_sample_total AS
     SELECT sample_id, SUM(count) AS total_count
     FROM cell_counts
     GROUP BY sample_id;
+
