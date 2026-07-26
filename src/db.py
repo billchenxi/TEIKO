@@ -29,3 +29,47 @@ POPULATION_LABELS = {
     "monocyte": "Monocyte",
 }
 
+REQUIRED_COLUMNS = ["project", "subject", "sample"] + CELL_POPULATIONS
+
+OPTIONAL_COLUMNS = [
+    "condition",
+    "age",
+    "sex",
+    "treatment",
+    "response",
+    "sample_type",
+    "time_from_treatment_start",
+]
+
+def connect(db_path: Path | str = DB_PATH):
+	_con = sqlite3.Connection(
+		database=str(object=db_path)
+	)
+
+	_con.execute("PRAGMA foreigh_keys=ON;")
+	_con.row_factory = sqlite3.Row
+
+	return _con
+
+def query(sql_q: str, params: tuple | dict = (), db_path: Path | str = DB_PATH) -> pd.DataFrame:
+    """
+    Run a query and return the result as a DataFrame.
+    """
+    with connect(db_path) as conn:
+        return pd.read_sql_query(sql_q, conn, params=params)
+
+
+def ensure_output_dirs() -> None:
+    """
+    Create the outputs if it does not already exist.
+    """
+    TABLE_DIR.mkdir(parents=True, exist_ok=True)
+    FIGURE_DIR.mkdir(parents=True, exist_ok=True)
+
+
+def require_database(db_path: Path | str = DB_PATH) -> None:
+    if not Path(db_path).exists():
+        raise FileNotFoundError(
+            f"Database not found at {db_path}.\n"
+            "Run `python load_data.py` (or `make pipeline`) first."
+        )
