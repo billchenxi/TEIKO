@@ -60,3 +60,9 @@ CREATE VIEW IF NOT EXISTS view_sample_total AS
     FROM cell_counts
     GROUP BY sample_id;
 
+CREATE INDEX IF NOT EXISTS idx_cell_counts_population ON cell_counts(population_id);
+CREATE INDEX IF NOT EXISTS idx_samples_subject        ON samples(subject_id);
+CREATE INDEX IF NOT EXISTS idx_samples_treatment      ON samples(treatment_id);
+CREATE INDEX IF NOT EXISTS idx_samples_sample_type    ON samples(sample_type_id);
+CREATE INDEX IF NOT EXISTS idx_subjects_project       ON subjects(project_id);
+CREATE INDEX IF NOT EXISTS idx_subjects_condition     ON subjects(condition_id);
