@@ -42,14 +42,14 @@ OPTIONAL_COLUMNS = [
 ]
 
 def connect(db_path: Path | str = DB_PATH):
-	_con = sqlite3.Connection(
+	_conn = sqlite3.Connection(
 		database=str(object=db_path)
 	)
 
-	_con.execute("PRAGMA foreigh_keys=ON;")
-	_con.row_factory = sqlite3.Row
+	_conn.execute("PRAGMA foreign_keys=ON;")
+	_conn.row_factory = sqlite3.Row
 
-	return _con
+	return _conn
 
 def query(sql_q: str, params: tuple | dict = (), db_path: Path | str = DB_PATH) -> pd.DataFrame:
     """
